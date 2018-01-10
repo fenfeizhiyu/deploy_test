@@ -10,6 +10,10 @@ import com.container.core.RunData;
  */
 public class MainRun {
 
+    /**
+     * -Xms20m -Xmx50m -XX:PermSize=16M -XX:MaxPermSize=32m
+     * @param args
+     */
     public static void main(String[] args){
         RunData.containerProcess=new ContainerProcess();
         RunData.containerProcess.start();
