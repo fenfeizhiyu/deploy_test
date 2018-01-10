@@ -20,11 +20,19 @@ public class RunData {
 
     public static ContainerClassLoader containerClassLoader;
 
-
-    public static Map<String, AppRunData> map = new HashMap<String, AppRunData>();
-
+    public static ContainerProcess containerProcess;
 
 
+    private static Map<String, AppRunData> map = new HashMap<String, AppRunData>();
 
+
+
+    public static synchronized void addDataMap(String key,AppRunData appRunData){
+        map.put(key, appRunData);
+    }
+
+    public static AppRunData getAppRunData(String key){
+        return map.get(key);
+    }
 
 }

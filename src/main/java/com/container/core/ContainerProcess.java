@@ -1,10 +1,10 @@
 package com.container.core;
 
+
 import com.container.load.AppClassLoader;
 import com.container.load.ContainerClassLoader;
 import com.container.model.AppModel;
 import com.container.model.AppRunData;
-
 
 import java.io.File;
 import java.util.ArrayList;
@@ -29,12 +29,27 @@ public class ContainerProcess {
      * 启动app
      */
     public void start(){
-        RunData.apps=getAppModels();getAppModels();
+        RunData.apps=getAppModels();
         initAppThread();
         for(Thread th:RunData.ths){
             th.start();
         }
+    }
 
+    /**
+     * 重新加载指定app
+     */
+    public void reLoadApp(AppModel appModel){
+        doInitAppThread(appModel).start();
+    }
+
+    /**
+     * 卸载指定app
+     */
+    public void unLoadApp(String appName){
+        AppRunData appRunData=RunData.getAppRunData(appName);
+        //关闭循环开关
+        appRunData.start =false;
     }
 
 
@@ -46,19 +61,42 @@ public class ContainerProcess {
     public void initAppThread(){
         if(RunData.apps.size()>0){
             for(AppModel app:RunData.apps){
-                AppProcess appProcess = new AppProcess(app.getAppPath(), app.getAppName());
-                Thread th = new Thread(appProcess);
-                th.setName("app:" + app.getAppName());
-                AppClassLoader appClassLoader = new AppClassLoader(RunData.containerClassLoader,app.getAppPath());
-                th.setContextClassLoader(appClassLoader);
-                RunData.ths.add(th);
-                AppRunData appRunData = new AppRunData();
-                appRunData.setAppModel();
-                RunData.map.put(app.getAppName(), appRunData);
+                doInitAppThread(app);
             }
         }else {
             System.out.println("no app run");
         }
+    }
+
+    private Thread doInitAppThread(AppModel app) {
+        AppProcess appProcess = new AppProcess(app.getAppPath(), app.getAppName());
+        Thread th = new Thread(appProcess);
+        th.setName("app:" + app.getAppName());
+        AppClassLoader appClassLoader = new AppClassLoader(RunData.containerClassLoader,app.getAppPath());
+        th.setContextClassLoader(appClassLoader);
+        RunData.ths.add(th);
+        AppRunData appRunData = new AppRunData();
+        appRunData.setAppModel(app);
+        appRunData.setThread(th);
+        RunData.addDataMap(app.getAppName(),appRunData);
+        return th;
+    }
+
+    /**
+     * 加载指定路径的app
+     * @param
+     * @return
+     */
+    public AppModel getAppModelByPath(File dir){
+        if(dir.isDirectory()){
+            AppModel am = new AppModel();
+            am.setAppName(dir.getName());
+            am.setAppPath(dir.getPath());
+            return am;
+        }else {
+            return null;
+        }
+
     }
 
 
@@ -71,11 +109,9 @@ public class ContainerProcess {
         try {
             File appDir=new File(Constant.APP_LOAD_PATH);
             for(File f:appDir.listFiles()){
-                if(f.isDirectory()){
-                    AppModel am = new AppModel();
-                    am.setAppName(f.getName());
-                    am.setAppPath(f.getPath());
-                    modes.add(am);
+                AppModel appModel=getAppModelByPath(f);
+                if(appModel!=null){
+                    modes.add(appModel);
                 }
             }
         } catch (Exception e) {

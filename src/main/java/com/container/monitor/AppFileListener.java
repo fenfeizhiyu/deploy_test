@@ -1,5 +1,7 @@
 package com.container.monitor;
 
+import com.container.core.AppReload;
+import com.container.core.RunData;
 import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 
@@ -43,8 +45,12 @@ public class AppFileListener implements FileAlterationListener {
     }
 
     private void printEvent(File file,String msg){
+        //AppReload.reloadApp(file.getName());
+        AppReload.reloadApp2(RunData.containerProcess,file.getName());
         System.out.println(file.getName()+":"+msg);
     }
+
+
 
 
 }

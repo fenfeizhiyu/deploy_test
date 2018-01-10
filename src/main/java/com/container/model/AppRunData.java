@@ -1,5 +1,7 @@
 package com.container.model;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * @author yu.yang
  */
@@ -8,6 +10,8 @@ public class AppRunData {
     private Thread thread;
 
     private AppModel appModel;
+
+    public  volatile boolean start =true;
 
 
     public Thread getThread() {
@@ -25,4 +29,6 @@ public class AppRunData {
     public void setAppModel(AppModel appModel) {
         this.appModel = appModel;
     }
+
+
 }

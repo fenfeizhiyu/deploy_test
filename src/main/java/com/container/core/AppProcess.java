@@ -1,5 +1,6 @@
 package com.container.core;
 
+import com.container.model.AppRunData;
 import com.container.util.FileSearchUtil;
 
 import java.lang.reflect.Method;
@@ -30,7 +31,7 @@ public class AppProcess  implements  Runnable{
      * 执行app中的appRum方法
      * appPath app项目路径
      */
-    public void runApp(String appPath){
+    public void runApp2(String appPath){
 
         Properties properties=FileSearchUtil.loadProperties(getAppPropertiesPath(appPath));
         String runClass=properties.getProperty(Constant.PROP_MAIN_METHOD_KEY);
@@ -43,6 +44,28 @@ public class AppProcess  implements  Runnable{
                 System.out.println("没有找到主方法");
             }
             while (true){
+                runMethod.invoke(obj);
+                sleep(1000L);
+            }
+        }catch (Exception e){
+
+        }
+    }
+
+    public void runApp(String appPath){
+
+        Properties properties=FileSearchUtil.loadProperties(getAppPropertiesPath(appPath));
+        String runClass=properties.getProperty(Constant.PROP_MAIN_METHOD_KEY);
+        ClassLoader classLoader=Thread.currentThread().getContextClassLoader();
+        try{
+            Class<?> clazz =  classLoader.loadClass(runClass);
+            Object obj=clazz.newInstance();
+            Method runMethod = clazz.getMethod(Constant.APP_MAIN_METHOD);
+            if(runMethod==null){
+                System.out.println("没有找到主方法");
+            }
+            AppRunData appRunData=RunData.getAppRunData(this.appName);
+            while (appRunData.start){
                 runMethod.invoke(obj);
                 sleep(1000L);
             }
